@@ -4,6 +4,10 @@ from typing import Dict, List
 from datetime import datetime, timezone
 from schemas import SessionCreate, SessionResponse, SessionStatus, SessionStatusUpdate
 from core.exceptions import SessionNotFoundException
+from core.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class SessionService:
     def __init__(self):
@@ -20,6 +24,7 @@ class SessionService:
                 created_at=datetime.now(timezone.utc)
             )
             self._store[session_id] = session
+            get_logger(__name__, session_id=session_id).info("session_created", status=session.status.value)
             return session
 
     async def get_session(self, session_id: str) -> SessionResponse:
@@ -34,7 +39,7 @@ class SessionService:
             session = self._store.get(session_id)
             if not session:
                 raise SessionNotFoundException(f"Session {session_id} not found", session_id=session_id)
-            
+
             valid_transitions = {
                 SessionStatus.PENDING: {SessionStatus.RUNNING, SessionStatus.CANCELLED, SessionStatus.FAILED},
                 SessionStatus.RUNNING: {SessionStatus.COMPLETE, SessionStatus.FAILED, SessionStatus.CANCELLED},
@@ -46,12 +51,19 @@ class SessionService:
             if update_data.status not in valid_transitions[session.status]:
                 raise ValueError(f"Invalid state transition from {session.status} to {update_data.status}")
 
+            old_status = session.status
             updated_session = session.model_copy(update={'status': update_data.status})
             self._store[session_id] = updated_session
+            get_logger(__name__, session_id=session_id).info(
+                "session_status_changed",
+                from_status=old_status.value,
+                to_status=update_data.status.value,
+            )
             return updated_session
 
     async def list_sessions(self) -> List[SessionResponse]:
         async with self._lock:
             return list(self._store.values())
+
 
 session_service = SessionService()

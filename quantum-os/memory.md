@@ -49,10 +49,26 @@
 [2026-05-26] CREATED apps/backend/services/providers/openrouter.py — OpenRouterProvider implementation
 [2026-05-26] CREATED apps/backend/services/provider_registry.py — ProviderRegistry singleton
 [2026-05-26] MODIFIED .env & apps/backend/.env — added Groq and OpenRouter API keys
-
+[2026-05-26] MODIFIED apps/backend/services/providers/base.py — Fixed ProviderAuthenticationError instantiation
+[2026-05-26] MODIFIED apps/backend/services/providers/groq.py — Updated deprecated groq model
+[2026-05-26] MODIFIED apps/backend/core/exceptions.py — Mapped ProviderAuthenticationError to 401 HTTP response
+[2026-05-26] MODIFIED apps/backend/test_providers.py — Updated test models for Groq and OpenRouter
+[2026-05-26] CREATED apps/backend/core/agent_memory.py — Cross-agent memory context and entry store
+[2026-05-26] CREATED apps/backend/services/memory_service.py — Per-session memory context lifecycle manager
+[2026-05-26] CREATED apps/backend/agents/orchestrator.py — SwarmOrchestrator session pipeline with memory sync
+[2026-05-26] MODIFIED apps/backend/agents/base_agent.py — Added memory context hooks and prompt helpers
+[2026-05-26] MODIFIED apps/backend/agents/planner_agent.py — Added memory registration and sibling-context prompt injection
+[2026-05-26] MODIFIED apps/backend/agents/speed_agent.py — Added memory progress tracking and prompt injection
+[2026-05-26] MODIFIED apps/backend/agents/scalability_agent.py — Added memory progress tracking and prompt injection
+[2026-05-26] MODIFIED apps/backend/agents/security_agent.py — Added memory progress tracking and prompt injection
+[2026-05-26] MODIFIED apps/backend/core/ws_events.py — Added session and memory sync event definitions
+[2026-05-26] CREATED apps/backend/verify_swarm_orchestrator.py — Deterministic swarm execution verifier
+[2026-05-26] CREATED apps/backend/verify_agent_memory_sync.py — Memory sync and race-condition verifier
 ## Architecture Decisions
 [2026-05-26] DECISION: pnpm monorepo — RATIONALE: workspace hoisting, fast installs, unified dependency management
 [2026-05-26] DECISION: Shared types package — RATIONALE: single source of truth for agent/task/ws types
+[2026-05-26] DECISION: Per-session AgentMemoryContext — RATIONALE: share sibling strategy context without global mutable state
+[2026-05-26] DECISION: Periodic memory:sync WS event — RATIONALE: keep clients updated during active sessions without waiting for completion
 
 ## Dependencies Installed
 zustand@latest — apps/frontend — global state management
