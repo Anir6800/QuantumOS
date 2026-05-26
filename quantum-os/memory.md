@@ -30,6 +30,13 @@
 [2026-05-26] CREATED src/app/dashboard/page.tsx — dashboard overview page
 [2026-05-26] MODIFIED src/lib/ws-client.ts — added readyState getter
 [2026-05-26] MODIFIED next.config.ts — disabled Next.js dev indicators
+[2026-05-26] CREATED apps/backend/core/exceptions.py — global exception handling
+[2026-05-26] CREATED apps/backend/core/middleware.py — request logging middleware
+[2026-05-26] CREATED apps/backend/schemas.py — pydantic schemas
+[2026-05-26] CREATED apps/backend/services/session_service.py — session state management
+[2026-05-26] CREATED apps/backend/routers/sessions.py — sessions router
+[2026-05-26] CREATED apps/backend/routers/agents.py — agents router
+[2026-05-26] MODIFIED apps/backend/main.py — integrated routers and middleware
 
 ## Architecture Decisions
 [2026-05-26] DECISION: pnpm monorepo — RATIONALE: workspace hoisting, fast installs, unified dependency management
