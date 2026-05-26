@@ -65,6 +65,10 @@ export class WebSocketClient {
     }
   }
 
+  public get readyState(): number {
+    return this.ws ? this.ws.readyState : 3; // 3 is CLOSED
+  }
+
   public on(event: WSEventType, handler: EventHandler): void {
     if (!this.handlers.has(event)) {
       this.handlers.set(event, new Set());

@@ -2,6 +2,10 @@
 
 ## Completed Tasks
 [2026-05-26] Phase 1 / Step 1.1 — Monorepo scaffolded with pnpm workspaces
+[2026-05-26] Phase 1 / Step 1.2 — Initialized Next.js 15 frontend
+[2026-05-26] Phase 1 / Step 1.3 — Initialized FastAPI backend
+[2026-05-26] Resolved Git push conflict by merging unrelated histories
+[2026-05-26] Copied .env.example files to .env in root and backend
 
 ## Files Modified
 [2026-05-26] CREATED memory.md — canonical template initialized
@@ -12,6 +16,14 @@
 [2026-05-26] CREATED apps/frontend/src/lib/api-client.ts
 [2026-05-26] CREATED apps/frontend/src/store/agent-store.ts
 [2026-05-26] CREATED apps/frontend/src/store/session-store.ts
+[2026-05-26] CREATED .env — Copied from root .env.example
+[2026-05-26] CREATED apps/backend/.env — Copied from backend .env.example
+[2026-05-26] CREATED src/app/page.tsx — landing page root
+[2026-05-26] CREATED src/components/landing/Navbar.tsx
+[2026-05-26] CREATED src/components/landing/HeroSection.tsx
+[2026-05-26] CREATED src/components/landing/FeaturesSection.tsx
+[2026-05-26] CREATED src/components/landing/CTASection.tsx
+[2026-05-26] MODIFIED src/app/layout.tsx — added dark theme and custom styling
 
 ## Architecture Decisions
 [2026-05-26] DECISION: pnpm monorepo — RATIONALE: workspace hoisting, fast installs, unified dependency management
@@ -23,5 +35,5 @@ framer-motion@latest — apps/frontend — UI animations
 socket.io-client@latest — apps/frontend — WebSocket communication
 
 ## Next Steps
-[ ] 1.2 — Initialize Next.js 15 frontend
-[ ] 1.3 — Initialize FastAPI backend
+[x] 1.2 — Initialize Next.js 15 frontend
+[x] 1.3 — Initialize FastAPI backend
