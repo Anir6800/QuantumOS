@@ -18,12 +18,16 @@ export const useSidebar = () => {
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(() => {
+  const [isOpen, setIsOpen] = useState(true);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('sidebar_state') !== 'false';
+      const saved = localStorage.getItem('sidebar_state');
+      if (saved !== null) {
+        setIsOpen(saved !== 'false');
+      }
     }
-    return true; // Default for SSR
-  });
+  }, []);
 
   const toggleSidebar = () => {
     setIsOpen((prev) => {

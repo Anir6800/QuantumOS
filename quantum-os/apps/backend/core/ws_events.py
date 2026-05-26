@@ -1,0 +1,22 @@
+import time
+from typing import Any, Dict
+
+ALL_EVENTS = {
+    "session:started": {"session_id": str, "timestamp": str},
+    "session:complete": {"session_id": str, "winner_agent_id": str},
+    "agent:started": {"agent_id": str, "model": str, "provider": str},
+    "agent:log": {"agent_id": str, "level": str, "message": str, "timestamp": str},
+    "agent:thinking": {"agent_id": str, "content": str},
+    "agent:complete": {"agent_id": str, "output": str, "duration_ms": int},
+    "agent:failed": {"agent_id": str, "error": str},
+    "benchmark:running": {"session_id": str, "agents_evaluated": int},
+    "benchmark:score": {"agent_id": str, "score": float, "metrics": dict},
+    "benchmark:winner": {"agent_id": str, "score": float, "summary": str}
+}
+
+def create_event(type: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "type": type,
+        "payload": payload,
+        "ts": int(time.time() * 1000)
+    }
