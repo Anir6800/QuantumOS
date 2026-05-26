@@ -38,6 +38,7 @@
 zustand@latest — apps/frontend — global state management
 framer-motion@latest — apps/frontend — UI animations
 socket.io-client@latest — apps/frontend — WebSocket communication
+lucide-react@latest — apps/frontend — icons
 
 ## Next Steps
 [x] 1.2 — Initialize Next.js 15 frontend
