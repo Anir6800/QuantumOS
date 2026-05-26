@@ -29,6 +29,7 @@
 [2026-05-26] CREATED src/components/dashboard/TopBar.tsx — top bar with connection status
 [2026-05-26] CREATED src/app/dashboard/page.tsx — dashboard overview page
 [2026-05-26] MODIFIED src/lib/ws-client.ts — added readyState getter
+[2026-05-26] MODIFIED next.config.ts — disabled Next.js dev indicators
 
 ## Architecture Decisions
 [2026-05-26] DECISION: pnpm monorepo — RATIONALE: workspace hoisting, fast installs, unified dependency management
