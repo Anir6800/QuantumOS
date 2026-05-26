@@ -42,9 +42,9 @@ export default function Navbar() {
                 </a>
               </Magnetic>
               <Magnetic strength={20}>
-                <button className="bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/30 px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-[#00e5ff] hover:text-[#050508] transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                <Link href="/dashboard" className="bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/30 px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-[#00e5ff] hover:text-[#050508] transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] inline-block">
                   Launch Swarm
-                </button>
+                </Link>
               </Magnetic>
             </div>
           </div>
@@ -68,9 +68,9 @@ export default function Navbar() {
               <Link href="#features" className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white">Features</Link>
               <Link href="#docs" className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white">Docs</Link>
               <a href="https://github.com" className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white">GitHub</a>
-              <button className="w-full text-left mt-4 bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/30 px-3 py-2 rounded-md text-base font-bold hover:bg-[#00e5ff] hover:text-[#050508]">
+              <Link href="/dashboard" className="block w-full text-center mt-4 bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/30 px-3 py-2 rounded-md text-base font-bold hover:bg-[#00e5ff] hover:text-[#050508]">
                 Launch Swarm
-              </button>
+              </Link>
             </div>
           </motion.div>
         )}

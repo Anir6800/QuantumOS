@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import Magnetic from './Magnetic';
 
 const Typewriter = ({ text, delay }: { text: string, delay: number }) => {
@@ -115,14 +116,14 @@ export default function HeroSection() {
           className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20"
         >
           <Magnetic strength={30}>
-            <button className="relative group w-full sm:w-auto bg-[#00e5ff] text-[#050508] px-10 py-5 rounded-xl font-black text-xl hover:bg-white transition-all overflow-hidden">
+            <Link href="/dashboard" className="relative group w-full sm:w-auto bg-[#00e5ff] text-[#050508] px-10 py-5 rounded-xl font-black text-xl hover:bg-white transition-all overflow-hidden inline-block text-center">
               <span className="relative z-10 flex items-center justify-center gap-2">
                 Launch Swarm 
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
               </span>
               <div className="absolute inset-0 h-full w-full bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
               <div className="absolute inset-0 bg-[#00e5ff] blur-[20px] -z-10 group-hover:opacity-100 opacity-50 transition-opacity" />
-            </button>
+            </Link>
           </Magnetic>
           
           <Magnetic strength={20}>

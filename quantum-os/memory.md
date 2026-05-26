@@ -24,6 +24,11 @@
 [2026-05-26] CREATED src/components/landing/FeaturesSection.tsx
 [2026-05-26] CREATED src/components/landing/CTASection.tsx
 [2026-05-26] MODIFIED src/app/layout.tsx — added dark theme and custom styling
+[2026-05-26] CREATED src/app/dashboard/layout.tsx — dashboard shell layout
+[2026-05-26] CREATED src/components/dashboard/Sidebar.tsx — collapsible sidebar
+[2026-05-26] CREATED src/components/dashboard/TopBar.tsx — top bar with connection status
+[2026-05-26] CREATED src/app/dashboard/page.tsx — dashboard overview page
+[2026-05-26] MODIFIED src/lib/ws-client.ts — added readyState getter
 
 ## Architecture Decisions
 [2026-05-26] DECISION: pnpm monorepo — RATIONALE: workspace hoisting, fast installs, unified dependency management
