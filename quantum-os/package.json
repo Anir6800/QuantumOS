@@ -1,0 +1,10 @@
+{
+  "name": "quantum-os",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "runs": "^1.0.1"
+  }
+}
