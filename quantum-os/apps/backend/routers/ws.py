@@ -29,6 +29,8 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                 elif msg_type == "get_status":
                     # Handle get status
                     pass
+                elif msg_type == "ping":
+                    await websocket.send_json({"type": "pong", "ts": message.get("ts", 0)})
                 elif msg_type == "pong":
                     # Handle heartbeat pong
                     pass

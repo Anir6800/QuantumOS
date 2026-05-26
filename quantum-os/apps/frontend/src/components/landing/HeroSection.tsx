@@ -96,7 +96,7 @@ export default function HeroSection() {
                 hidden: { opacity: 0, y: 40, rotateX: -90 },
                 visible: { opacity: 1, y: 0, rotateX: 0, transition: { type: 'spring', damping: 15, stiffness: 100 } }
               }}
-              className="text-6xl md:text-8xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/60 drop-shadow-sm"
+              className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/60 drop-shadow-sm"
             >
               {word}
             </motion.span>
@@ -104,7 +104,7 @@ export default function HeroSection() {
         </motion.div>
 
         <div className="h-24 md:h-20 mb-12 max-w-3xl mx-auto">
-          <p className="text-xl md:text-2xl text-gray-400 font-mono leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-400 font-mono leading-relaxed">
             <Typewriter text="Deploy intelligent swarms that parallel-test solutions and auto-benchmark the most optimized production-ready output." delay={1000} />
           </p>
         </div>
@@ -116,7 +116,7 @@ export default function HeroSection() {
           className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20"
         >
           <Magnetic strength={30}>
-            <Link href="/dashboard" className="relative group w-full sm:w-auto bg-[#00e5ff] text-[#050508] px-10 py-5 rounded-xl font-black text-xl hover:bg-white transition-all overflow-hidden inline-block text-center">
+            <Link href="/dashboard" className="relative group w-full sm:w-auto bg-[#00e5ff] text-[#050508] px-6 py-4 sm:px-10 sm:py-5 rounded-xl font-black text-lg sm:text-xl hover:bg-white transition-all overflow-hidden inline-block text-center">
               <span className="relative z-10 flex items-center justify-center gap-2">
                 Launch Swarm 
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
@@ -127,7 +127,7 @@ export default function HeroSection() {
           </Magnetic>
           
           <Magnetic strength={20}>
-            <button className="w-full sm:w-auto bg-transparent text-white border-2 border-white/10 px-10 py-5 rounded-xl font-bold text-xl hover:border-white/30 hover:bg-white/5 transition-all focus:outline-none">
+            <button className="w-full sm:w-auto bg-transparent text-white border-2 border-white/10 px-6 py-4 sm:px-10 sm:py-5 rounded-xl font-bold text-lg sm:text-xl hover:border-white/30 hover:bg-white/5 transition-all focus:outline-none">
               View Docs
             </button>
           </Magnetic>

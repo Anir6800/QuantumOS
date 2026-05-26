@@ -16,8 +16,8 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-8 max-w-6xl mx-auto w-full">
       <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Overview of your QuantumOS environment</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-1">Overview of your QuantumOS environment</p>
         </div>
         <Link 
           href="/dashboard/session"
@@ -29,7 +29,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {STATS.map((stat, i) => (
           <div key={i} className="bg-card border border-border p-6 rounded-xl flex items-center justify-between shadow-sm">
             <div>

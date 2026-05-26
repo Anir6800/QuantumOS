@@ -36,7 +36,19 @@
 [2026-05-26] CREATED apps/backend/services/session_service.py — session state management
 [2026-05-26] CREATED apps/backend/routers/sessions.py — sessions router
 [2026-05-26] CREATED apps/backend/routers/agents.py — agents router
-[2026-05-26] MODIFIED apps/backend/main.py — integrated routers and middleware
+[2026-05-26] CREATED apps/backend/core/ws_events.py — WS event definitions
+[2026-05-26] CREATED apps/backend/core/connection_manager.py — WS connection manager
+[2026-05-26] CREATED apps/backend/services/ws_broadcaster.py — WS broadcaster singleton
+[2026-05-26] CREATED apps/backend/routers/ws.py — WS router
+[2026-05-26] MODIFIED apps/backend/main.py — integrated ws router
+[2026-05-26] MODIFIED apps/backend/routers/ws.py — added ping/pong response handling
+[2026-05-26] CREATED apps/backend/ws_verify.py — script to test WS connection and broadcast
+[2026-05-26] CREATED apps/backend/core/config.py — environment config
+[2026-05-26] CREATED apps/backend/services/providers/base.py — Abstract BaseProvider
+[2026-05-26] CREATED apps/backend/services/providers/groq.py — GroqProvider implementation
+[2026-05-26] CREATED apps/backend/services/providers/openrouter.py — OpenRouterProvider implementation
+[2026-05-26] CREATED apps/backend/services/provider_registry.py — ProviderRegistry singleton
+[2026-05-26] MODIFIED .env & apps/backend/.env — added Groq and OpenRouter API keys
 
 ## Architecture Decisions
 [2026-05-26] DECISION: pnpm monorepo — RATIONALE: workspace hoisting, fast installs, unified dependency management
@@ -51,3 +63,13 @@ lucide-react@latest — apps/frontend — icons
 ## Next Steps
 [x] 1.2 — Initialize Next.js 15 frontend
 [x] 1.3 — Initialize FastAPI backend
+
+## Components Added
+StatusDot — src/components/common/StatusDot.tsx — agent/session status indicator
+ModelBadge — src/components/common/ModelBadge.tsx — AI model + provider badge
+TimerDisplay — src/components/common/TimerDisplay.tsx — live elapsed timer
+LogPanel — src/components/common/LogPanel.tsx — virtualized log viewer
+ScoreBar — src/components/common/ScoreBar.tsx — animated score visualization
+EmptyState — src/components/common/EmptyState.tsx — empty state UI pattern
+CopyButton — src/components/common/CopyButton.tsx — clipboard copy with feedback
+ConnectionBadge — src/components/common/ConnectionBadge.tsx — WebSocket status

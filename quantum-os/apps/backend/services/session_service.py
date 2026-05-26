@@ -35,7 +35,17 @@ class SessionService:
             if not session:
                 raise SessionNotFoundException(f"Session {session_id} not found", session_id=session_id)
             
-            # Simple state machine validation could go here
+            valid_transitions = {
+                SessionStatus.PENDING: {SessionStatus.RUNNING, SessionStatus.CANCELLED, SessionStatus.FAILED},
+                SessionStatus.RUNNING: {SessionStatus.COMPLETE, SessionStatus.FAILED, SessionStatus.CANCELLED},
+                SessionStatus.COMPLETE: set(),
+                SessionStatus.FAILED: set(),
+                SessionStatus.CANCELLED: set(),
+            }
+
+            if update_data.status not in valid_transitions[session.status]:
+                raise ValueError(f"Invalid state transition from {session.status} to {update_data.status}")
+
             updated_session = session.model_copy(update={'status': update_data.status})
             self._store[session_id] = updated_session
             return updated_session

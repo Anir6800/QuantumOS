@@ -3,7 +3,7 @@ import uvicorn
 
 from core.exceptions import QuantumOSException, global_exception_handler
 from core.middleware import RequestLoggingMiddleware
-from routers import sessions, agents
+from routers import sessions, agents, ws
 
 app = FastAPI(
     title="QuantumOS Backend",
@@ -15,6 +15,7 @@ app.add_exception_handler(QuantumOSException, global_exception_handler)
 
 app.include_router(sessions.router)
 app.include_router(agents.router)
+app.include_router(ws.router)
 
 @app.get("/health")
 async def health_check():

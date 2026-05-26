@@ -62,8 +62,8 @@ function FeatureCard({ feature, idx }: { feature: any, idx: number }) {
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00e5ff]/10 to-[#8b5cf6]/10 flex items-center justify-center mb-8 border border-white/10 group-hover:border-[#00e5ff]/40 transition-colors shadow-lg">
           {feature.icon}
         </div>
-        <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-[#00e5ff] transition-colors">{feature.title}</h3>
-        <p className="text-gray-400 leading-relaxed font-mono text-base">
+        <h3 className="text-xl md:text-2xl font-bold text-white mb-4 group-hover:text-[#00e5ff] transition-colors">{feature.title}</h3>
+        <p className="text-gray-400 leading-relaxed font-mono text-sm md:text-base">
           {feature.description}
         </p>
       </div>
@@ -80,7 +80,7 @@ export default function FeaturesSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight"
+            className="text-3xl sm:text-4xl md:text-6xl font-black text-white mb-6 tracking-tight"
           >
             Engineering, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-[#8b5cf6]">Reimagined</span>
           </motion.h2>
@@ -89,13 +89,13 @@ export default function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-gray-400 max-w-2xl mx-auto text-xl font-mono"
+            className="text-gray-400 max-w-2xl mx-auto text-lg md:text-xl font-mono"
           >
             Stop treating AI like a chatbot. Treat it like an engineering team.
           </motion.p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, idx) => (
             <FeatureCard key={idx} feature={feature} idx={idx} />
           ))}

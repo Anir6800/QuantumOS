@@ -16,6 +16,9 @@ class AgentNotFoundException(QuantumOSException):
 class AgentExecutionError(QuantumOSException):
     pass
 
+class ProviderAuthenticationError(QuantumOSException):
+    pass
+
 async def global_exception_handler(request: Request, exc: QuantumOSException):
     content = {"error": exc.__class__.__name__, "message": exc.message}
     if exc.session_id:
@@ -26,5 +29,7 @@ async def global_exception_handler(request: Request, exc: QuantumOSException):
         status_code = 404
     elif isinstance(exc, AgentExecutionError):
         status_code = 400
+    elif isinstance(exc, ProviderAuthenticationError):
+        status_code = 401
         
     return JSONResponse(status_code=status_code, content=content)

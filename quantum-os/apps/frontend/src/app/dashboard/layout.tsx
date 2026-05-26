@@ -43,8 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Sidebar */}
         <div
           suppressHydrationWarning
-          className="flex-shrink-0 transition-[width] duration-300 ease-in-out border-r border-border bg-card overflow-hidden"
-          style={{ width: isOpen ? '240px' : '64px' }}
+          className={`flex-shrink-0 transition-[width] duration-300 ease-in-out border-r border-border bg-card overflow-hidden ${!isOpen ? 'w-16' : 'w-60'} hidden sm:block`}
         >
           <Sidebar />
         </div>
@@ -52,7 +51,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
           <TopBar />
-          <main className="flex-1 overflow-auto bg-background p-6">
+          <main className="flex-1 overflow-auto bg-background p-4 md:p-6 lg:p-8">
             {children}
           </main>
         </div>
