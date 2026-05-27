@@ -36,34 +36,29 @@ class ConnectionManager:
     async def broadcast_to_session(self, session_id: str, event_type: str, payload: dict):
         if session_id not in self.active_connections:
             return
-        
         from core.ws_events import create_event
         message = create_event(event_type, payload)
-        
-        disconnected = []
-        for ws in self.active_connections[session_id]:
-            try:
-                await ws.send_json(message)
-            except Exception:
-                disconnected.append(ws)
-                
-        for ws in disconnected:
-            self.disconnect(ws, session_id)
+
+        # Send concurrently to reduce per-connection latency
+        conns = list(self.active_connections[session_id])
+        send_coros = [self._safe_send_json(ws, message, session_id) for ws in conns]
+        results = await asyncio.gather(*send_coros, return_exceptions=True)
+        for ws, res in zip(conns, results):
+            if isinstance(res, Exception):
+                self.disconnect(ws, session_id)
 
     async def broadcast_all(self, event_type: str, payload: dict):
         from core.ws_events import create_event
         message = create_event(event_type, payload)
-        
+
+        # Broadcast per-session concurrently
         for session_id, connections in list(self.active_connections.items()):
-            disconnected = []
-            for ws in connections:
-                try:
-                    await ws.send_json(message)
-                except Exception:
-                    disconnected.append(ws)
-                    
-            for ws in disconnected:
-                self.disconnect(ws, session_id)
+            conns = list(connections)
+            send_coros = [self._safe_send_json(ws, message, session_id) for ws in conns]
+            results = await asyncio.gather(*send_coros, return_exceptions=True)
+            for ws, res in zip(conns, results):
+                if isinstance(res, Exception):
+                    self.disconnect(ws, session_id)
 
     def get_session_connection_count(self, session_id: str) -> int:
         return len(self.active_connections.get(session_id, []))
@@ -73,9 +68,17 @@ class ConnectionManager:
             while True:
                 await asyncio.sleep(30)
                 try:
-                    await ws.send_json({"type": "ping", "ts": int(asyncio.get_event_loop().time() * 1000)})
+                    # lightweight ping to keep connection alive; use text to avoid json overhead
+                    await ws.send_text(f"ping:{int(asyncio.get_event_loop().time() * 1000)}")
                 except Exception:
                     self.disconnect(ws, session_id)
                     break
         except asyncio.CancelledError:
             pass
+
+    async def _safe_send_json(self, ws: WebSocket, message: dict, session_id: str):
+        try:
+            await ws.send_json(message)
+        except Exception as e:
+            logger.debug(f"send_json failed for session {session_id}: {e}")
+            return e

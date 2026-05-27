@@ -90,3 +90,25 @@ class AgentMemoryContext:
             "created_at": self.created_at,
             "entries": [entry.model_dump(mode="json") for entry in self._entries.values()],
         }
+
+    def get_brief_snapshot(self) -> dict:
+        """Return a compact snapshot intended for frequent websocket syncs.
+
+        This excludes large final outputs and keeps only partial previews and status metadata.
+        """
+        return {
+            "session_id": self.session_id,
+            "task_description": self.task_description,
+            "created_at": self.created_at,
+            "entries": [
+                {
+                    "agent_id": entry.agent_id,
+                    "name": entry.name,
+                    "status": entry.status,
+                    "partial_output_preview": entry.partial_output_preview,
+                    "started_at": entry.started_at,
+                    "completed_at": entry.completed_at,
+                }
+                for entry in self._entries.values()
+            ],
+        }

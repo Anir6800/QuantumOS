@@ -38,7 +38,9 @@ class GroqProvider(BaseProvider):
                 tokens_out = usage.get("completion_tokens", 0)
                 logger.log_api_call(self.provider_name, model, tokens_in, tokens_out, (time.time() - start_time) * 1000)
                 return data["choices"][0]["message"]["content"]
-        return await self._retry_with_backoff(_call)
+
+        # Deduplicate identical completion requests and cache results
+        return await self.cached_call(messages, model, lambda: self._retry_with_backoff(_call), extra=kwargs)
 
     async def stream(self, messages: List[Dict[str, str]], model: str, **kwargs) -> AsyncGenerator[str, None]:
         payload = {"model": model, "messages": messages, "stream": True, **kwargs}

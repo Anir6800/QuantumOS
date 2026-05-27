@@ -1,61 +1,49 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Sidebar } from '@/components/dashboard/Sidebar';
+import React, { useEffect, useState } from 'react';
 import { TopBar } from '@/components/dashboard/TopBar';
-
-interface SidebarContextType {
-  isOpen: boolean;
-  toggleSidebar: () => void;
-}
-
-export const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
-
-export const useSidebar = () => {
-  const context = useContext(SidebarContext);
-  if (!context) throw new Error('useSidebar must be used within a SidebarProvider');
-  return context;
-};
+import { BottomNav } from '@/components/dashboard/BottomNav';
+import { useDemoShortcut } from '@/hooks/useDemoShortcut';
+import { useDemoStore } from '@/store/demo-store';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(true);
+  // Initialize keyboard listener globally
+  useDemoShortcut();
+  
+  const isDemoModeActive = useDemoStore((state) => state.isDemoModeActive);
+  const [flash, setFlash] = useState(false);
 
+  // Trigger flash effect on toggle
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sidebar_state');
-      if (saved !== null) {
-        setIsOpen(saved !== 'false');
-      }
+    if (isDemoModeActive) {
+      setFlash(true);
+      const timer = setTimeout(() => setFlash(false), 800);
+      return () => clearTimeout(timer);
     }
-  }, []);
-
-  const toggleSidebar = () => {
-    setIsOpen((prev) => {
-      const newState = !prev;
-      localStorage.setItem('sidebar_state', String(newState));
-      return newState;
-    });
-  };
+  }, [isDemoModeActive]);
 
   return (
-    <SidebarContext.Provider value={{ isOpen, toggleSidebar }}>
-      <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
-        {/* Sidebar */}
-        <div
-          suppressHydrationWarning
-          className={`flex-shrink-0 transition-[width] duration-300 ease-in-out border-r border-border bg-card overflow-hidden ${!isOpen ? 'w-16' : 'w-60'} hidden sm:block`}
-        >
-          <Sidebar />
-        </div>
+    <div className="relative flex h-screen w-full bg-gradient-to-br from-slate-950 via-indigo-950/80 to-slate-950 text-foreground overflow-hidden">
+      
+      {/* Holographic Flash Overlay for Demo Mode Activation */}
+      <div 
+        className={`absolute inset-0 pointer-events-none z-50 transition-all duration-700 ${
+          flash ? 'bg-cyan-500/20 backdrop-blur-md opacity-100' : 'bg-transparent backdrop-blur-none opacity-0'
+        }`} 
+      />
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <TopBar />
-          <main className="flex-1 overflow-auto bg-background p-4 md:p-6 lg:p-8">
-            {children}
-          </main>
-        </div>
+      {/* Main Content */}
+      <div className="relative z-10 flex-1 flex flex-col min-w-0 h-full">
+        <TopBar />
+        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 pb-28">
+          {children}
+        </main>
       </div>
-    </SidebarContext.Provider>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
+      
+      {/* Demo Mode Indicator (Hidden as requested) */}
+    </div>
   );
 }

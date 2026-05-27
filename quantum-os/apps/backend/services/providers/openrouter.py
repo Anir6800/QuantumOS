@@ -17,7 +17,17 @@ class OpenRouterProvider(BaseProvider):
 
     @property
     def supported_models(self) -> List[str]:
-        return ["deepseek/deepseek-coder", "meta-llama/llama-3.1-70b", "qwen/qwen2.5-coder-7b"]
+        return [
+            "deepseek/deepseek-coder",
+            "meta-llama/llama-3.1-70b",
+            "qwen/qwen2.5-coder-7b",
+            "llama-3.1-8b-instant",
+            "llama-3.3-70b-versatile",
+            "qwen/qwen3-32b",
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "openai/gpt-oss-safeguard-20b",
+        ]
 
     def _get_headers(self) -> dict:
         return {
@@ -40,7 +50,9 @@ class OpenRouterProvider(BaseProvider):
                 tokens_out = usage.get("completion_tokens", 0)
                 logger.log_api_call(self.provider_name, model, tokens_in, tokens_out, (time.time() - start_time) * 1000)
                 return data["choices"][0]["message"]["content"]
-        return await self._retry_with_backoff(_call)
+
+        # Use cached_call to dedupe identical complete requests and cache responses
+        return await self.cached_call(messages, model, lambda: self._retry_with_backoff(_call), extra=kwargs)
 
     async def stream(self, messages: List[Dict[str, str]], model: str, **kwargs) -> AsyncGenerator[str, None]:
         payload = {"model": model, "messages": messages, "stream": True, **kwargs}

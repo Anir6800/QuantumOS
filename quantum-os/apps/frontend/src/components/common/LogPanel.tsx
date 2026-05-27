@@ -22,9 +22,19 @@ const levelColors = {
   debug: 'text-gray-400 dark:text-gray-600'
 }
 
+const LogRow = React.memo(function LogRow({ log }: { log: LogEntry }) {
+  return (
+    <div className={`mb-1 ${levelColors[log.level]}`}>
+      <span className="opacity-50 mr-2">[{new Date(log.ts).toLocaleTimeString()}]</span>
+      <span className="uppercase opacity-70 mr-2 w-12 inline-block">[{log.level}]</span>
+      <span>{log.message}</span>
+    </div>
+  )
+})
+
 export function LogPanel({ logs, maxHeight = '400px', className = '' }: LogPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  
+
   // Virtualize: only render last 200 entries to prevent DOM bloat
   const displayLogs = logs.slice(-200)
 
@@ -32,7 +42,7 @@ export function LogPanel({ logs, maxHeight = '400px', className = '' }: LogPanel
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [displayLogs])
+  }, [displayLogs.length])
 
   return (
     <div 
@@ -48,11 +58,7 @@ export function LogPanel({ logs, maxHeight = '400px', className = '' }: LogPanel
           <div className="text-gray-400 dark:text-gray-600 italic">Waiting for logs...</div>
         ) : (
           displayLogs.map(log => (
-            <div key={log.id} className={`mb-1 ${levelColors[log.level]}`}>
-              <span className="opacity-50 mr-2">[{new Date(log.ts).toLocaleTimeString()}]</span>
-              <span className="uppercase opacity-70 mr-2 w-12 inline-block">[{log.level}]</span>
-              <span>{log.message}</span>
-            </div>
+            <LogRow key={log.id} log={log} />
           ))
         )}
       </div>

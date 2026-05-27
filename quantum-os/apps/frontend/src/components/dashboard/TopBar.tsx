@@ -33,7 +33,7 @@ export function TopBar() {
   }
 
   return (
-    <div className="h-16 border-b border-border bg-card flex items-center justify-between px-4 md:px-6 lg:px-8 flex-shrink-0">
+    <div className="h-16 border-b border-white/10 bg-black/20 backdrop-blur-md flex items-center justify-between px-4 md:px-6 lg:px-8 flex-shrink-0 shadow-sm z-20 relative">
       <div>
         <h1 className="font-semibold text-base md:text-lg text-foreground">
           {sessionId ? `Session: ${sessionId}` : 'No Active Session'}

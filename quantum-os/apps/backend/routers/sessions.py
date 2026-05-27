@@ -9,6 +9,11 @@ router = APIRouter(prefix="/api/v1/sessions", tags=["sessions"])
 async def create_session(session: SessionCreate):
     return await session_service.create_session(session)
 
+
+@router.post("/{session_id}/start", response_model=SessionResponse, status_code=status.HTTP_200_OK)
+async def start_session(session_id: str):
+    return await session_service.start_session(session_id)
+
 @router.get("", response_model=List[SessionResponse], status_code=status.HTTP_200_OK)
 async def list_sessions():
     return await session_service.list_sessions()

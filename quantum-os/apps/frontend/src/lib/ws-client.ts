@@ -10,6 +10,8 @@ export class WebSocketClient {
   private maxReconnectAttempts = 5;
   private currentUrl: string | null = null;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+  private openResolvers: Array<() => void> = [];
+  private openRejectors: Array<(error: Error) => void> = [];
 
   private constructor() {}
 
@@ -29,11 +31,17 @@ export class WebSocketClient {
     this.ws.onopen = () => {
       this.reconnectAttempts = 0;
       console.log(`WebSocket connected to ${url}`);
+      this.openResolvers.splice(0).forEach(resolve => resolve());
     };
 
     this.ws.onmessage = (event: MessageEvent) => {
+      const rawData = event.data;
+      if (typeof rawData === 'string' && (rawData.startsWith('ping:') || rawData.startsWith('pong:'))) {
+        return;
+      }
+
       try {
-        const payload = JSON.parse(event.data) as WSEventPayload;
+        const payload = JSON.parse(rawData) as WSEventPayload;
         const eventHandlers = this.handlers.get(payload.event);
         if (eventHandlers) {
           eventHandlers.forEach(handler => handler(payload.data));
@@ -49,8 +57,35 @@ export class WebSocketClient {
 
     this.ws.onerror = (error: Event) => {
       console.error('WebSocket error:', error);
+      this.openRejectors.splice(0).forEach(reject => reject(new Error('WebSocket error')));
       this.ws?.close();
     };
+  }
+
+  public async connectAndWait(url: string, timeoutMs = 5000): Promise<void> {
+    if (this.ws?.readyState === WebSocket.OPEN) return;
+
+    this.connect(url);
+
+    if (this.ws?.readyState === WebSocket.OPEN) return;
+
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.openResolvers = this.openResolvers.filter((item) => item !== resolve);
+        this.openRejectors = this.openRejectors.filter((item) => item !== reject);
+        reject(new Error(`WebSocket connection timeout after ${timeoutMs}ms`));
+      }, timeoutMs);
+
+      const cleanup = () => clearTimeout(timeout);
+      this.openResolvers.push(() => {
+        cleanup();
+        resolve();
+      });
+      this.openRejectors.push((error) => {
+        cleanup();
+        reject(error);
+      });
+    });
   }
 
   public disconnect(): void {
@@ -59,6 +94,8 @@ export class WebSocketClient {
       this.reconnectTimeout = null;
     }
     this.currentUrl = null;
+    this.openResolvers = [];
+    this.openRejectors = [];
     if (this.ws) {
       this.ws.close();
       this.ws = null;
@@ -74,6 +111,15 @@ export class WebSocketClient {
       this.handlers.set(event, new Set());
     }
     this.handlers.get(event)!.add(handler);
+  }
+
+  public off(event: WSEventType, handler: EventHandler): void {
+    const eventHandlers = this.handlers.get(event);
+    if (!eventHandlers) return;
+    eventHandlers.delete(handler);
+    if (eventHandlers.size === 0) {
+      this.handlers.delete(event);
+    }
   }
 
   public emit(event: WSEventType, payload: unknown): void {

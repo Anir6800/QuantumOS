@@ -45,7 +45,7 @@ class PlannerAgent(BaseAgent):
     async def generate_strategies(self, plan: TaskPlan) -> list[AgentStrategy]:
         system_prompt = await self._inject_sibling_context(
             PLANNER_SYSTEM_PROMPT,
-            strategy_summary=strategy.approach,
+            strategy_summary="Decompose the task into distinct implementation strategies.",
             specialty="planning and decomposition",
         )
 
@@ -66,9 +66,9 @@ class PlannerAgent(BaseAgent):
             },
         ]
 
-        raw = await asyncio.wait_for(self._provider.complete(messages=messages, model=self.model), timeout=30)
-
         try:
+            # Use centralized routing to pick the best provider/model for planning tasks
+            raw = await asyncio.wait_for(provider_registry.run_completion_for_role("planning", messages, preferred_models=[self.model]), timeout=30)
             parsed: Any = json.loads(raw)
             if isinstance(parsed, dict):
                 parsed = [parsed]
@@ -94,8 +94,8 @@ class PlannerAgent(BaseAgent):
                 strategy_id="strat-b",
                 name="Event-Driven Pipeline",
                 approach="Use queue-like internal events to decouple planning, execution, and reporting components.",
-                model_recommendation="deepseek/deepseek-coder",
-                provider_recommendation="openrouter",
+                model_recommendation="llama-3.1-8b-instant",
+                provider_recommendation="groq",
                 constraints=["Higher complexity", "More observability needed"],
                 success_criteria=["Loose coupling", "Resilient stage retries"],
             ),
@@ -103,7 +103,7 @@ class PlannerAgent(BaseAgent):
                 strategy_id="strat-c",
                 name="Parallel Specialist Agents",
                 approach="Split the task into independent workstreams executed by specialized agents in parallel.",
-                model_recommendation="llama-3.3-70b-versatile",
+                model_recommendation="mixtral-8x7b-32768",
                 provider_recommendation="groq",
                 constraints=["Coordination overhead", "Requires conflict resolution"],
                 success_criteria=["Reduced total cycle time", "High quality merge output"],
@@ -147,4 +147,12 @@ class PlannerAgent(BaseAgent):
         await self.update_status(AgentStatus.COMPLETE)
         await self.log("info", "Planner completed")
         await self._record_complete(str(result.model_dump()))
-        return AgentResult(success=True, data=result.model_dump())
+        return AgentResult(
+            success=True,
+            data={
+                "agent_id": self.agent_id,
+                "agent_name": self.name,
+                "model": self.model,
+                **result.model_dump(),
+            },
+        )

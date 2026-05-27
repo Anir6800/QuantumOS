@@ -1,19 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { ModelBadge } from '@/components/common';
+import { api } from '@/lib/api-client';
 import { useSessionStore } from '@/store/session-store';
 import { wsClient } from '@/lib/ws-client';
 
-const MODEL_OPTIONS = [
-  { id: 'deepseek-coder', label: 'DeepSeek Coder V2', provider: 'openrouter' },
-  { id: 'llama-3.1-70b', label: 'Llama 3.1 70B', provider: 'groq' },
-  { id: 'mistral-7b', label: 'Mistral 7B Instruct', provider: 'openrouter' },
-  { id: 'qwen2.5-coder', label: 'Qwen 2.5 Coder', provider: 'together' },
-  { id: 'nemotron-70b', label: 'Nemotron 70B', provider: 'nvidia' },
-];
+type ModelOption = { id: string; label: string; provider: string }
+
+const FALLBACK_MODELS: ModelOption[] = [
+  { id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B Versatile', provider: 'groq' },
+  { id: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant', provider: 'groq' },
+  { id: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B 32768', provider: 'groq' },
+  { id: 'gemma2-9b-it', label: 'Gemma 2 9B IT', provider: 'groq' },
+  { id: 'openai/gpt-oss-120b', label: 'OpenAI GPT OSS 120B', provider: 'openrouter' },
+  { id: 'openai/gpt-oss-20b', label: 'OpenAI GPT OSS 20B', provider: 'openrouter' },
+  { id: 'openai/gpt-oss-safeguard-20b', label: 'OpenAI GPT OSS Safeguard 20B', provider: 'openrouter' },
+]
 
 export function SessionLaunchForm() {
   const router = useRouter();
@@ -22,10 +27,37 @@ export function SessionLaunchForm() {
   const [taskDescription, setTaskDescription] = useState('');
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [agentCount, setAgentCount] = useState(3);
-  const [preferredProvider, setPreferredProvider] = useState('openrouter');
-  
+  const [modelOptions, setModelOptions] = useState<ModelOption[]>(FALLBACK_MODELS);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ taskDescription?: string; selectedModels?: string }>({});
+
+  useEffect(() => {
+    let active = true
+
+    const loadModels = async () => {
+      try {
+        const providersResponse = await api.get<{ providers?: string[] }>('/api/v1/providers')
+        const providers = providersResponse.providers ?? ['groq']
+        const responses = await Promise.all(
+          providers.map(async (provider) => {
+            const response = await api.get<{ provider?: string; models?: ModelOption[] }>(`/api/v1/providers/${provider}/models`)
+            return response.models ?? []
+          })
+        )
+        const models = responses.flat()
+        if (active && models.length) {
+          setModelOptions(models)
+        }
+      } catch {
+        if (active) setModelOptions(FALLBACK_MODELS)
+      }
+    }
+
+    void loadModels()
+    return () => {
+      active = false
+    }
+  }, [])
   
   const handleModelToggle = (modelId: string) => {
     setSelectedModels(prev => 
@@ -52,31 +84,19 @@ export function SessionLaunchForm() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('/api/v1/sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          task_description: taskDescription, 
-          models: selectedModels, 
-          num_agents: agentCount 
-        }),
+      const data = await api.post<{ id?: string; session_id?: string; task_description?: string }>('/api/v1/sessions', {
+        task_description: taskDescription,
+        models: selectedModels,
+        num_agents: agentCount,
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to create session');
-      }
-      
-      const data = await response.json();
       const sessionId = data.id || data.session_id || 'test-session-id'; // Fallback for mocking
-      
+      await wsClient.connectAndWait(`ws://127.0.0.1:8000/api/v1/ws/${sessionId}`);
+      await api.post(`/api/v1/sessions/${sessionId}/start`, {});
+
       startSession(sessionId, taskDescription);
       
-      // Connect websocket (assuming API_URL is handled inside wsClient or use base url)
-      // Usually you'd connect ws-client here:
-      wsClient.connect(`ws://localhost:8000/ws/${sessionId}`); // Mock URL since we don't have API_URL defined, wsClient likely uses relative
-      
       router.push('/dashboard/agents');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       // Fallback for demo without backend
       const sessionId = 'mock-session-' + Date.now();
@@ -120,10 +140,10 @@ export function SessionLaunchForm() {
       </div>
 
       <div className="space-y-3">
-        <label className="block text-sm font-medium text-foreground">Model Options</label>
+        <label className="block text-sm font-medium text-foreground">Groq Models</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {MODEL_OPTIONS.map(model => (
-            <label key={model.id} className="flex items-center gap-3 p-3 border border-border rounded-md hover:bg-muted/50 cursor-pointer transition-colors">
+          {modelOptions.map((model, index) => (
+            <label key={`${model.provider}:${model.id}:${index}`} className="flex items-center gap-3 p-3 border border-border rounded-md hover:bg-muted/50 cursor-pointer transition-colors">
               <input
                 type="checkbox"
                 checked={selectedModels.includes(model.id)}
@@ -159,21 +179,6 @@ export function SessionLaunchForm() {
         <p className="text-sm text-muted-foreground">
           Roles: <span className="font-medium text-foreground">{getAgentRoles(agentCount)}</span>
         </p>
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="preferredProvider" className="block text-sm font-medium text-foreground">Preferred Provider</label>
-        <select
-          id="preferredProvider"
-          value={preferredProvider}
-          onChange={(e) => setPreferredProvider(e.target.value)}
-          className="w-full p-2.5 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
-        >
-          <option value="openrouter">OpenRouter</option>
-          <option value="groq">Groq</option>
-          <option value="together">Together</option>
-          <option value="nvidia">NVIDIA</option>
-        </select>
       </div>
 
       <button

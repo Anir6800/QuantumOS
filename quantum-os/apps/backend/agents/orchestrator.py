@@ -62,8 +62,15 @@ class SwarmOrchestrator:
             strategies = [AgentStrategy(**strategy) for strategy in planner_payload.get("strategies", [])]
 
             agent_pairs: list[tuple[BaseAgent, AgentStrategy]] = []
-            for strategy in strategies[: self.max_concurrent_agents]:
-                agent = await self._create_agent_from_strategy(strategy)
+            selected_models = session.models or [
+                "llama-3.3-70b-versatile",
+                "llama-3.1-8b-instant",
+                "mixtral-8x7b-32768",
+            ]
+            target_count = min(self.max_concurrent_agents, session.num_agents or 3, len(strategies), len(selected_models))
+            for index, strategy in enumerate(strategies[:target_count]):
+                model = selected_models[index % len(selected_models)]
+                agent = await self._create_agent_from_strategy(strategy, model=model)
                 if agent:
                     agent.memory_context = memory_context
                     agent_pairs.append((agent, strategy))
@@ -81,7 +88,7 @@ class SwarmOrchestrator:
                     "strategy": strategy,
                 }
                 try:
-                    return await asyncio.wait_for(agent.execute(task_payload), timeout=90)
+                    return await asyncio.wait_for(agent.execute(task_payload), timeout=35)
                 except Exception as error:
                     await self._handle_agent_failure(agent.agent_id, error)
                     return AgentResult(success=False, error=str(error))
@@ -137,10 +144,9 @@ class SwarmOrchestrator:
             sync_task.cancel()
             asyncio.create_task(self._cleanup_context_later(self.session_id))
 
-    async def _create_agent_from_strategy(self, strategy: AgentStrategy) -> Optional[BaseAgent]:
-        provider = self.provider_registry.get_provider(strategy.provider_recommendation)
-        model = strategy.model_recommendation
+    async def _create_agent_from_strategy(self, strategy: AgentStrategy, model: str) -> Optional[BaseAgent]:
         strategy_type = (strategy.name + " " + strategy.approach).lower()
+        provider = self.provider_registry.get_model_provider(model)
 
         if "security" in strategy_type or "secure" in strategy_type:
             return SecurityAgent(session_id=self.session_id, broadcaster=self.broadcaster, model=model, provider=provider.provider_name)
@@ -165,12 +171,29 @@ class SwarmOrchestrator:
 
     async def _sync_memory_loop(self, memory_context, stop_event: asyncio.Event):
         try:
+            last_fingerprint = None
             while not stop_event.is_set():
-                await self.broadcaster.broadcast_to_session(
-                    self.session_id,
-                    "memory:sync",
-                    memory_context.get_snapshot(),
-                )
+                # Broadcast a compact snapshot frequently to avoid sending large payloads repeatedly
+                try:
+                    brief = memory_context.get_brief_snapshot()
+                except Exception:
+                    brief = memory_context.get_snapshot()
+
+                # Simple change detection to avoid repeating identical payloads
+                try:
+                    import json
+
+                    fingerprint = json.dumps(brief, sort_keys=True)
+                except Exception:
+                    fingerprint = str(brief)
+
+                if fingerprint != last_fingerprint:
+                    await self.broadcaster.broadcast_to_session(
+                        self.session_id,
+                        "memory:sync",
+                        brief,
+                    )
+                    last_fingerprint = fingerprint
                 try:
                     await asyncio.wait_for(stop_event.wait(), timeout=5)
                 except asyncio.TimeoutError:
